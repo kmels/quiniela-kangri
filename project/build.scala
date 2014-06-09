@@ -5,6 +5,9 @@ import org.scalatra.sbt.PluginKeys._
 import com.mojolly.scalate.ScalatePlugin._
 import ScalateKeys._
 
+import com.earldouglas.xsbtwebplugin.PluginKeys._
+import com.earldouglas.xsbtwebplugin.WebPlugin._
+
 object QuinielaBuild extends Build {
   val Organization = "kangris"
   val Name = "Quiniela"
@@ -21,6 +24,7 @@ object QuinielaBuild extends Build {
       version := Version,
       scalaVersion := ScalaVersion,
       resolvers += Classpaths.typesafeReleases,
+      port in container.Configuration := 56474,
       libraryDependencies ++= Seq(
         "org.scalatra" %% "scalatra" % ScalatraVersion,
         "org.scalatra" %% "scalatra-scalate" % ScalatraVersion,
@@ -28,6 +32,10 @@ object QuinielaBuild extends Build {
         "ch.qos.logback" % "logback-classic" % "1.0.6" % "runtime",
         "org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106" % "container",
         "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016" % "container;provided;test" artifacts (Artifact("javax.servlet", "jar", "jar"))
+        /* database layer */
+        , "com.typesafe.slick" %% "slick" % "2.0.1"
+        , "c3p0" % "c3p0" % "0.9.1.2"
+        , "org.postgresql" % "postgresql" % "9.3-1101-jdbc41"
       ),
       scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>
         Seq(

@@ -1,0 +1,53 @@
+<% import com.example.app._ %>
+<%@ var body: String %>
+<%@ var pageTitle: String = "Quiniela Kangris" %>
+<%@ val user: Usuario = null%>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../../assets/ico/favicon.ico">
+
+    <title>Bitpaga - ${pageTitle}</title>
+
+    <link href="/bootstrap-3.1.1-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/public/css/main.css" rel="stylesheet"/>
+    <script src="/public/js/jquery-1.11.0.min.js"></script>
+
+    <script src="/bootstrap-3.1.1-dist/js/bootstrap.min.js"></script>
+    <link href="/jumbotron-narrow.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="header clear">
+        <ul class="nav nav-pills pull-right">
+          <li class="active"><a href="/">Home</a></li>
+
+          #if (user != null)
+              <li><a href="/cliente/logout"><span class="glyphicon glyphicon-log-out"></span> Logout</a>
+              </li>
+          #else
+               <li class="loginLink"><a href="/login"><span class="glyphicon glyphicon-log-in"></span> Login</a>
+               </li>
+          #end
+        </ul>
+
+        <div><h3><a href="/">
+            <img class="pull-left img-circle" height="50px" src="/images/logo.jpg" alt="Bitpaga.gt">
+            Quiniela Kangris</a></h3>
+        </div>
+      </div>
+
+      <%= unescape(body) %>
+
+      <div class="footer">
+        <p>&copy; Bitpaga, Guatemala, 2014</p>
+      </div>
+</div> <!-- /container -->
+</body>
+</html>

@@ -1,0 +1,27 @@
+<% import com.example.app._ %>
+<%@ val partidos: List[Partido] %>
+<%@ val title: String = "Predicciones" %>
+
+#for (p <- partidos)
+    <div style="height:150px;">
+        <div class="pull-left text-center country-container">
+            ${p.equipo1}
+            <br>
+            <img src="/images/flags/${p.equipo1}.png">
+            <br>
+            <input name="${p.id}_goles_equipo1" type="number" class="form-control score-input">
+        </div>
+
+        <div class="pull-left text-center country-container">
+            <h2>VS</h2>
+        </div>
+
+        <div class="pull-left text-center country-container">
+            ${p.equipo2}
+            <br>
+            <img src="/images/flags/${p.equipo2}.png">
+            <br>
+            <input name="${p.id}_goles_equipo2" type="number" class="form-control score-input">
+        </div>
+    </div>
+#end
