@@ -154,6 +154,21 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
         ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
   }
 
+  get("/puntuaciones"){
+    val loggedUser = session.getAttribute("user")
+    contentType = "text/html"
+
+    if (loggedUser != null){
+      val usuarios: List[(Usuario, (Int, Int))] = db.withSession{implicit session =>{
+        val usrs = usuariosdb.list()
+        val pos = usrs.map(u => (u.id.toInt, 0))
+
+        usrs.zip(pos)
+      }}
+      ssp("puntuaciones.ssp", "usuarios" -> usuarios)
+    } else
+      ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
+  }
   notFound {
     findTemplate(requestPath) map { path =>
       contentType = "text/html"

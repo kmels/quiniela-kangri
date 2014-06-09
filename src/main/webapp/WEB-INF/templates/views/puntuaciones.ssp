@@ -1,0 +1,22 @@
+<% import com.example.app._ %>
+<%@ val usuarios: List[(Usuario, (Int, Int))] = Nil %>
+
+<table class="table">
+    <thead>
+      <tr>
+         <th>Posici&oacute;n</th>
+         <th>Kangri</th>
+         <th>Puntuaci&oacute;n</th>
+      </tr>
+     </thead>
+     <tbody>
+      #for ((u, (pos, pts))<- usuarios)
+      <tr>
+          <td>${pos}</td>
+          <td>${u.ident}</td>
+          <td>${pts}</td>
+      </tr>
+      #end
+     </tbody>
+
+</table>
