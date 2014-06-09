@@ -28,7 +28,7 @@ class Predicciones(tag: Tag) extends Table[Prediccion](tag, "predicciones"){
   def goles_equipo2 = column[Int]("goles_equipo2")
 
   def user = foreignKey("USER_FK", user_id, TableQuery[Usuarios])(_.id, onDelete=ForeignKeyAction.Cascade)
-  def partido = foreignKey("PARTIDO_FK", user_id, TableQuery[Partidos])(_.id, onDelete=ForeignKeyAction.Cascade)
+  def partido = foreignKey("PARTIDO_FK", partido_id, TableQuery[Partidos])(_.id, onDelete=ForeignKeyAction.Cascade)
 
   def * = (id, user_id, partido_id, goles_equipo1, goles_equipo2) <> (Prediccion.tupled, Prediccion.unapply)
 }

@@ -1,14 +1,14 @@
 <%@ val error: String = "" %>
 
+  #if (error != "")
+      <div class='alert alert-warning'>${error}</div>
+  #end
+
 <form class="form-horizontal" action='/registro' method="POST">
 <fieldset>
   <div id="legend">
     <legend class="">Registro</legend>
   </div>
-
-  #if (error != "")
-      <div class='alert alert-warning'>${error}</div>
-  #end
 
   <div class="control-group">
     <!-- Username -->

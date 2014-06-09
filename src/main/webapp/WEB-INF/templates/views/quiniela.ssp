@@ -1,15 +1,21 @@
 <% import com.example.app._ %>
-<%@ val partidos: List[Partido] = Nil %>
+<%@ val predicciones: List[(Partido, Prediccion)] = Nil %>
 <%@ val title: String = "Predicciones" %>
 
-#for (p <- partidos)
+<form action="/update" method="POST">
+
+#for ((partido,prediccion) <- predicciones)
     <div style="height:150px;">
         <div class="pull-left text-center country-container">
-            ${p.equipo1}
+            ${partido.equipo1}
             <br>
-            <img src="/images/flags/${p.equipo1}.png">
+            <img src="/images/flags/${partido.equipo1}.png">
             <br>
-            <input name="${p.id}_goles_equipo1" type="number" class="form-control score-input">
+            <input
+                #if (prediccion.goles_equipo1 >= 0)
+                    value="${prediccion.goles_equipo1}"
+                #end
+                    name="${partido.id}_goles_equipo1" type="number" class="form-control score-input">
         </div>
 
         <div class="pull-left text-center country-container">
@@ -17,11 +23,19 @@
         </div>
 
         <div class="pull-left text-center country-container">
-            ${p.equipo2}
+            ${partido.equipo2}
             <br>
-            <img src="/images/flags/${p.equipo2}.png">
+            <img src="/images/flags/${partido.equipo2}.png">
             <br>
-            <input name="${p.id}_goles_equipo2" type="number" class="form-control score-input">
+            <input
+                #if (prediccion.goles_equipo2 >= 0)
+                    value="${prediccion.goles_equipo2}"
+                #end
+                name="${partido.id}_goles_equipo2" type="number" class="form-control score-input">
         </div>
     </div>
 #end
+
+<button type="submit" class="btn btn-success btn-lg">Guardar</button>
+
+</form>

@@ -2,14 +2,7 @@
 <%@ val warning: String = "" %>
 <%@ val info: String = "" %>
 
-
-<form class="form-horizontal" action='/login' method="POST">
-<fieldset>
-  <div id="legend">
-    <legend class="">Login</legend>
-  </div>
-
-   #if (success != "")
+#if (success != "")
      <div class='alert alert-success'>${success}</div>
    #end
 
@@ -20,6 +13,12 @@
    #if (info != "")
     <div class='alert alert-info'>${info}</div>
    #end
+
+<form class="form-horizontal" action='/login' method="POST">
+<fieldset>
+  <div id="legend">
+    <legend class="">Login</legend>
+  </div>
 
   <div class="control-group">
     <!-- Username -->
