@@ -165,7 +165,7 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
 
         usrs.zip(pos)
       }}
-      ssp("puntuaciones.ssp", "usuarios" -> usuarios)
+      ssp("puntuaciones.ssp", "usuarios" -> usuarios, "user" -> session.getAttribute("user"))
     } else
       ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
   }
