@@ -88,19 +88,22 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
         partidosdb.list()
       }
 
+      val loggedUser = user.asInstanceOf[Usuario]
       val predicciones: List[(Partido,Prediccion)] = db.withSession{
         implicit session =>
-          val ps = prediccionesdb.list()
+          //prediccines del usuario logueado
+          val ps: List[Prediccion] = prediccionesdb.filter(_.user_id === loggedUser.id).list()
 
+          //si no tiene ni una, crearle
           if (ps.isEmpty){
-            val newPs = partidosdb.list().map(p => new Prediccion(-1, user.asInstanceOf[Usuario].id, p.id, -1, -1))
-            newPs.foreach(prediccionesdb.insert(_))
+            val newPs = partidosdb.list().map(p => new Prediccion(-1, loggedUser.id, p.id, -1, -1))
+            newPs.foreach(prediccionVacia => prediccionesdb.insert(prediccionVacia))
           }
 
-          //join
+          //producto punto con partidos (join con partidos)
           val q = for {
             pa <- partidosdb
-            pr <- prediccionesdb if (pr.partido_id === pa.id)
+            pr <- prediccionesdb if (pr.partido_id === pa.id && pr.user_id === loggedUser.id)
           } yield (pa, pr)
 
           q.list()
