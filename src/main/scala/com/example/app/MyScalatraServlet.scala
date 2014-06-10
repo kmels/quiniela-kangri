@@ -12,7 +12,8 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
   //inicio
   get("/") {
     contentType = "text/html"
-    ssp("inicio.ssp", "user" -> session.getAttribute("user"))
+    val nregistrados: Int = db.withSession{implicit session => usuariosdb.list().size}
+    ssp("inicio.ssp", "user" -> session.getAttribute("user"), "nregistrados" -> nregistrados)
   }
 
   //registro
