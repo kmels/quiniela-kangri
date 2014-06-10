@@ -1,12 +1,15 @@
-# Quiniela #
-
 ## Build & Run ##
 
 ```sh
-$ cd Quiniela
+$ cd quiniela-kangri
 $ ./sbt
 > container:start
 > browse
 ```
 
-If `browse` doesn't launch your browser, manually open [http://localhost:8080/](http://localhost:8080/) in your browser.
+If `browse` doesn't launch your browser, manually open [http://localhost:56474/](http://localhost:56474/) in your browser.
+
+## Dependencies ##
+
+ * [http://www.scala-sbt.org/](scala-sbt)
+ * postgresql
