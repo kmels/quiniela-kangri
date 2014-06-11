@@ -5,8 +5,8 @@ import scalate.ScalateSupport
 import slick.driver.PostgresDriver.simple._
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.MessageDigest
-import java.sql.Date
 import scala.collection.immutable.TreeMap
+import java.util.Date
 
 class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
   def md5(s: String) = new HexBinaryAdapter().marshal(MessageDigest.getInstance("MD5").digest(s.getBytes))
@@ -80,9 +80,9 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
     redirect("/")
   }
 
-  implicit val dateOrdering = new Ordering[java.sql.Date] {
+  /*implicit val dateOrdering = new Ordering[java.sql.Date] {
     def compare(x: java.sql.Date, y: java.sql.Date) = x.compareTo(y)
-  }
+  }*/
 
   //lista partidos
   get("/quiniela"){
@@ -116,7 +116,7 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
           q.list()
       }
 
-      val prediccionesPorFecha: TreeMap[java.sql.Date,List[(Partido,Prediccion)]] = {
+      val prediccionesPorFecha: TreeMap[Date,List[(Partido,Prediccion)]] = {
         val m = predicciones.groupBy(pp => pp._1.fecha)
         TreeMap(m.toSeq:_*)
       }

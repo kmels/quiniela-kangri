@@ -1,8 +1,11 @@
 package com.example.app
 
-import java.sql.Date
+import java.util.Date
 import slick.driver.PostgresDriver.simple._
 import scala.slick.model.ForeignKeyAction
+import scala.slick.ast.TypedType
+
+//import scala.slick.lifted.TypeMapper
 
 /**
  * Created by kmels on 8/06/14.
@@ -38,6 +41,19 @@ case class Partidos(tag: Tag) extends Table[Partido](tag, "partidos"){
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def equipo1 =column[String]("equipo1")
   def equipo2 = column[String]("equipo2")
+
+  /*implicit val transactionStateTypeTypeMapper = MappedColumnType.base[TransactionState.Value, Int](
+  {
+    cyp => cyp.id // conversion from EliminationPathway to int
+  },{
+    id => TransactionState(id) // conversion back from int to enum
+  })*/
+
+  implicit val DateMapper = MappedColumnType.base[Date, Long](
+    d => d.getTime(), //from date to long
+    t => new Date(t)
+  )
+
   def fecha = column[Date]("fecha")
 
   def * = (id, equipo1, equipo2, fecha) <> (Partido.tupled, Partido.unapply)
