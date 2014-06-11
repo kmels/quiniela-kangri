@@ -1,6 +1,8 @@
+<% import java.text.SimpleDateFormat %>
 <% import com.example.app._ %>
 <%@ val prediccionesPorFecha: Map[java.util.Date,List[(Partido,Prediccion)]] %>
-
+<%@ val df: SimpleDateFormat = new SimpleDateFormat("d/MM/yyyy") %>
+<%@ val tf: SimpleDateFormat = new SimpleDateFormat("hh:mm") %>
 <%@ val title: String = "Predicciones" %>
 
 <form action="/update" method="POST">
@@ -9,7 +11,7 @@
     <div class="col-xs-8">
 
     #for ((fecha,predicciones) <- prediccionesPorFecha)
-        <h4>${fecha}</h4>
+        <h4>${df.format(fecha)}</h4>
 
         #for ((partido,prediccion) <- predicciones)
             <div style="height:150px;">
@@ -26,7 +28,8 @@
             </div>
 
             <div class="pull-left text-center country-container">
-                <h3>VS</h3>
+                <h4>${tf.format(fecha)}</h4>
+                <h4>VS</h4>
             </div>
 
             <div class="pull-left text-center country-container">
