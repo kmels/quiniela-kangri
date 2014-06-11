@@ -87,11 +87,11 @@ class ScalatraBootstrap extends LifeCycle with DatabaseSupport{
 
     // Grupo H
     insertarPartido("Bélgica", "Algeria", at("17/06/2014 11:00"))
-    insertarPartido("Rusia", "Corea del Sur", at("17/06/2014 16:00"))
+    insertarPartido("Rusia", "Corea del Sur", at("17/06/2014 17:00"))
     insertarPartido("Bélgica", "Rusia", at("22/06/2014 11:00"))
-    insertarPartido("Corea del Sur", "Rusia", at("22/06/2014 14:00"))
-    insertarPartido("Corea del Sur", "Algeria", at("26/06/2014 15:00"))
-    insertarPartido("Algeria", "Rusia", at("25/06/2014 15:00"))
+    insertarPartido("Corea del Sur", "Algeria", at("22/06/2014 14:00"))
+    insertarPartido("Algeria", "Algeria", at("26/06/2014 15:00"))
+    insertarPartido("Corea del Sur", "Bélgica", at("25/06/2014 15:00"))
   }
 
   def at(p: String) = dateFormat.parse(p)

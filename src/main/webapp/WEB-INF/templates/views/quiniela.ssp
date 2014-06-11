@@ -1,11 +1,16 @@
 <% import com.example.app._ %>
-<%@ val predicciones: List[(Partido, Prediccion)] = Nil %>
+<%@ val prediccionesPorFecha: Map[java.sql.Date,List[(Partido,Prediccion)]] %>
+
 <%@ val title: String = "Predicciones" %>
 
 <form action="/update" method="POST">
+<button type="submit" class="btn btn-success btn-lg">Guardar</button>
 
-#for ((partido,prediccion) <- predicciones)
-    <div style="height:150px;">
+#for ((fecha,predicciones) <- prediccionesPorFecha)
+    <h4>${fecha}</h4>
+
+    #for ((partido,prediccion) <- predicciones)
+        <div style="height:150px;">
         <div class="pull-left text-center country-container">
             ${partido.equipo1}
             <br>
@@ -33,7 +38,8 @@
                 #end
                 name="${partido.id}_goles_equipo2" type="number" class="form-control score-input">
         </div>
-    </div>
+        </div>
+    #end
 #end
 
 <button type="submit" class="btn btn-success btn-lg">Guardar</button>
