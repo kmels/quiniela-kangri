@@ -17,7 +17,7 @@
 
     <link href="/bootstrap-3.1.1-dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/main.css" rel="stylesheet"/>
-
+    <script src="/jquery-1.11.0.min.js"></script>
     <script src="/bootstrap-3.1.1-dist/js/bootstrap.min.js"></script>
     <link href="/jumbotron-narrow.css" rel="stylesheet">
   </head>

@@ -4,10 +4,11 @@
 <%@ val df: SimpleDateFormat = new SimpleDateFormat("d/MM/yyyy") %>
 <%@ val tf: SimpleDateFormat = new SimpleDateFormat("hh:mm") %>
 <%@ val title: String = "Predicciones" %>
+<%@ val mensajes: List[((MensajeChat,Usuario), Int)] %>
+<%@ val user: Usuario = null%>
 
 <form action="/update" method="POST">
 <div class="quiniela-container row">
-
     <div class="col-xs-8">
 
     #for ((fecha,predicciones) <- prediccionesPorFecha)
@@ -50,6 +51,10 @@
 
     <div class="col-xs-4" style="position:fixed; right:0;">
         <button type="submit" class="btn btn-success btn-lg">Guardar</button>
+
+        <% render("/WEB-INF/templates/views/chat.ssp",
+               Map("mensajes" -> mensajes, "user" -> user, "collapsed" -> true))
+        %>
     </div>
 </div>
 

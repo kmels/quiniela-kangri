@@ -1,0 +1,99 @@
+<% import java.util.Locale %>
+<% import java.text.SimpleDateFormat %>
+<% import com.example.app._ %>
+<%@ val locale: Locale = new Locale("es", "ES") %>
+<%@ val msjDate: SimpleDateFormat = new SimpleDateFormat(" EEEE, hh:mm", locale) %>
+<%@ val mensajes: List[((MensajeChat,Usuario), Int)] %>
+<%@ val user: Usuario = null%>
+<%@ val collapsed: Boolean = false %>
+
+<div class="col-xs-11 pull-right">
+   <div class="panel panel-primary">
+       <div class="panel-heading" id="accordion">
+           <span class="glyphicon glyphicon-comment"></span> Mensajes
+           <div class="btn-group pull-right">
+               <a type="button" class="btn btn-default btn-xs" data-toggle="collapse" data-parent="#accordion" href="#chat">
+                   <span class="glyphicon glyphicon-chevron-down"></span>
+               </a>
+           </div>
+       </div>
+   <div class="panel-collapse collapse
+        #if (!collapsed)
+            in
+        #end
+        " id="chat">
+       <div class="panel-body">
+           <ul class="chat" style="overflow-y: scroll; height:350px;">
+                #for (((mensaje,autor),idx) <- mensajes)
+                <li class="
+                    #if ((idx % 2) == 0)
+                        left
+                    #else
+                        right
+                    #end
+                    clearfix" style="list-style:none">
+                    <div class="chat-body clearfix">
+                      <div class="header">
+                          <strong class="primary-font">${autor.ident}:</strong> <small class="pull-right text-muted">
+                              <span class="glyphicon glyphicon-time"></span>${msjDate.format(mensaje.fecha_emision)}</small>
+                      </div>
+                      <p>${mensaje.texto}</p>
+                  </div>
+                </li>
+                #end
+                <!--
+               <li class="left clearfix" style="list-style:none">
+                   <div class="chat-body clearfix">
+                       <div class="header">
+                           <strong class="primary-font">Jack Sparrow</strong> <small class="pull-right text-muted">
+                               <span class="glyphicon glyphicon-time"></span>12 mins ago</small>
+                       </div>
+                       <p>
+                           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
+                           dolor, quis ullamcorper ligula sodales.
+                       </p>
+                   </div>
+               </li>
+               <li class="right clearfix" style="list-style: none;">
+                   <div class="chat-body clearfix" >
+                       <div class="header">
+                           <small class=" text-muted"><span class="glyphicon glyphicon-time"></span>13 mins ago</small>
+                           <strong class="pull-right primary-font">Bhaumik Patel</strong>
+                       </div>
+                       <p>
+                           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
+                           dolor, quis ullamcorper ligula sodales.
+                       </p>
+                   </div>
+               </li>-->
+           </ul>
+       </div>
+       <div class="panel-footer">
+           <div class="input-group">
+                #if (user != null)
+                    <input id="texto-mensaje" type="text" class="form-control input-sm" placeholder="Type your message here..." />
+                    <span class="input-group-btn">
+                   <button class="btn btn-warning btn-sm" onClick="enviarMsj()" id="btn-chat">
+                       Enviar</button>
+                #end
+               </span>
+           </div>
+       </div>
+   </div>
+   </div>
+</div>
+
+<script type="text/javascript">
+    function enviarMsj(){
+        var texto = $("#texto-mensaje").val()
+        //alert(texto);
+
+        $.post('/mensaje/'+texto, function(data){location.reload();})
+    }
+
+    $("#texto-mensaje").keyup(function (e) {
+        if (e.keyCode == 13) {
+            enviarMsj();
+        }
+    })
+</script>

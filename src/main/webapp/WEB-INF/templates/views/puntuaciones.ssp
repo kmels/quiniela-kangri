@@ -1,5 +1,7 @@
 <% import com.example.app._ %>
 <%@ val usuarios: List[(Usuario, (Int, Int))] = Nil %>
+<%@ val mensajes: List[((MensajeChat,Usuario), Int)] %>
+<%@ val user: Usuario = null%>
 
 <table class="table">
     <thead>
@@ -18,5 +20,5 @@
       </tr>
       #end
      </tbody>
-
 </table>
+

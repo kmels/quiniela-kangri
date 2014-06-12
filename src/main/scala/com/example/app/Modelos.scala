@@ -15,7 +15,23 @@ case class Usuario(id: Long, ident: String, pw: String)
 case class Prediccion(id: Long, user_id: Long, partido_id: Long, goles_equipo1: Int, goles_equipo2: Int)
 case class Partido(id: Long, equipo1: String, equipo2: String, fecha: Date)
 case class Resultado(partido_id: Long, goles_equipo1: Int, goles_equipo2: Int)
+case class MensajeChat(id: Long, autor_id: Long, texto: String, fecha_emision: Date)
 
+class MensajesChat(tag: Tag) extends Table[MensajeChat](tag, "mensajes_chat"){
+  def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+  def autor_id = column[Long]("autor_id")
+  def texto = column[String]("texto")
+  def fecha_emision = column[Date]("fecha")
+
+  implicit val DateMapper = MappedColumnType.base[Date, Long](
+    d => d.getTime(), //from date to long
+    t => new Date(t)
+  )
+
+  def autor = foreignKey("AUTOR_FK", autor_id, TableQuery[Usuarios])(_.id, onDelete=ForeignKeyAction.Cascade)
+
+  def * = (id, autor_id, texto, fecha_emision) <> (MensajeChat.tupled, MensajeChat.unapply)
+}
 class Usuarios(tag: Tag) extends Table[Usuario](tag, "usuarios"){
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def ident = column[String]("ident")
@@ -41,13 +57,6 @@ case class Partidos(tag: Tag) extends Table[Partido](tag, "partidos"){
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def equipo1 =column[String]("equipo1")
   def equipo2 = column[String]("equipo2")
-
-  /*implicit val transactionStateTypeTypeMapper = MappedColumnType.base[TransactionState.Value, Int](
-  {
-    cyp => cyp.id // conversion from EliminationPathway to int
-  },{
-    id => TransactionState(id) // conversion back from int to enum
-  })*/
 
   implicit val DateMapper = MappedColumnType.base[Date, Long](
     d => d.getTime(), //from date to long

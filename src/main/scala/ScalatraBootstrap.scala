@@ -19,6 +19,8 @@ class ScalatraBootstrap extends LifeCycle with DatabaseSupport{
           (usuariosdb.ddl).create
         if (MTable.getTables("predicciones").list().isEmpty)
           (prediccionesdb.ddl).create
+        if (MTable.getTables("mensajes_chat").list().isEmpty)
+          (mensajesChat.ddl).create
     }
 
     primeraRonda()

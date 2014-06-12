@@ -7,6 +7,8 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.security.MessageDigest
 import scala.collection.immutable.TreeMap
 import java.util.Date
+import json._
+import org.json4s.{DefaultFormats, Formats}
 
 class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
   def md5(s: String) = new HexBinaryAdapter().marshal(MessageDigest.getInstance("MD5").digest(s.getBytes))
@@ -15,7 +17,21 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
   get("/") {
     contentType = "text/html"
     val nregistrados: Int = db.withSession{implicit session => usuariosdb.list().size}
-    ssp("inicio.ssp", "user" -> session.getAttribute("user"), "nregistrados" -> nregistrados)
+    ssp("inicio.ssp", "mensajes" -> getMensajes, "user" -> session.getAttribute("user"), "nregistrados" -> nregistrados)
+  }
+
+  def getMensajes: List[((MensajeChat,Usuario), Int)] = {
+    val msjs: List[(MensajeChat,Usuario)] = db.withSession{ implicit session =>
+
+      val q = for {
+        msj <- mensajesChat
+        usr <- usuariosdb if (msj.autor_id === usr.id)
+      } yield (msj, usr)
+
+      q.list()
+    }
+
+    msjs.sortBy(_._1.fecha_emision).reverse.zipWithIndex
   }
 
   //registro
@@ -121,7 +137,7 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
         TreeMap(m.toSeq:_*)
       }
 
-      ssp("quiniela.ssp", "prediccionesPorFecha" -> prediccionesPorFecha, "user" -> session.getAttribute("user"))
+      ssp("quiniela.ssp", "mensajes" -> getMensajes, "prediccionesPorFecha" -> prediccionesPorFecha, "user" -> session.getAttribute("user"))
     } else {
       ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
     }
@@ -180,14 +196,33 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
 
         usrs.zip(pos)
       }}
-      ssp("puntuaciones.ssp", "usuarios" -> usuarios, "user" -> session.getAttribute("user"))
+      ssp("puntuaciones.ssp", "usuarios" -> usuarios, "user" -> session.getAttribute("user"), "mensajes" -> getMensajes)
     } else
       ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
   }
+
   notFound {
     findTemplate(requestPath) map { path =>
       contentType = "text/html"
       layoutTemplate(path)
     } orElse serveStaticResource() getOrElse redirect("/")
+  }
+
+  post("/mensaje/:texto"){
+    val loggedUser = session.getAttribute("user")
+    implicit val jsonFormats: Formats = DefaultFormats
+    //contentType = formats("json")
+
+    if (loggedUser != null){
+      val user: Usuario = loggedUser.asInstanceOf[Usuario]
+      val texto = params("texto")
+      val now = new Date()
+      logger.info(user.ident + " dice: "+texto)
+      db.withSession{implicit session => mensajesChat.insert(new MensajeChat(-1, user.id, texto, now))}
+    }else{
+      List[MensajeChat]()
+    }
+
+    redirect("/")
   }
 }

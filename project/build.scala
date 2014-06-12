@@ -36,6 +36,8 @@ object QuinielaBuild extends Build {
         , "com.typesafe.slick" %% "slick" % "2.0.1"
         , "c3p0" % "c3p0" % "0.9.1.2"
         , "org.postgresql" % "postgresql" % "9.3-1101-jdbc41"
+        , "org.scalatra" %% "scalatra-json" % "2.2.2"
+        , "org.json4s"   %% "json4s-jackson" % "3.2.6"
       ),
       scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>
         Seq(
