@@ -1,5 +1,5 @@
 <% import com.example.app._ %>
-<%@ val usuarios: List[(Usuario, (Int, Int))] = Nil %>
+<%@ val usuarios: List[((Usuario, Int), Int)] = Nil %>
 <%@ val mensajes: List[((MensajeChat,Usuario), Int)] %>
 <%@ val user: Usuario = null%>
 
@@ -12,7 +12,7 @@
       </tr>
      </thead>
      <tbody>
-      #for ((u, (pos, pts))<- usuarios)
+      #for (((u,pts),pos) <- usuarios)
       <tr>
           <td>${pos}</td>
           <td>${u.ident}</td>

@@ -21,6 +21,8 @@ class ScalatraBootstrap extends LifeCycle with DatabaseSupport{
           (prediccionesdb.ddl).create
         if (MTable.getTables("mensajes_chat").list().isEmpty)
           (mensajesChat.ddl).create
+        if (MTable.getTables("resultados").list().isEmpty)
+          (resultadosdb.ddl).create
     }
 
     primeraRonda()
@@ -33,6 +35,7 @@ class ScalatraBootstrap extends LifeCycle with DatabaseSupport{
 
     // Grupo A
     insertarPartido("Brasil", "Croacia", at("12/06/2014 14:00"))
+    insertarResultado("Brasil","Croacia", 1, 1)
     insertarPartido("México", "Camerún", at("13/06/2014 10:00"))
     insertarPartido("Brasil", "México", at("17/06/2014 13:00"))
     insertarPartido("Camerún", "Croacia", at("18/06/2014 16:00"))
@@ -97,6 +100,28 @@ class ScalatraBootstrap extends LifeCycle with DatabaseSupport{
   }
 
   def at(p: String) = dateFormat.parse(p)
+
+  def insertarResultado(equipo1: String, equipo2: String, goles_equipo1: Int, goles_equipo2: Int) {
+    db.withSession{
+      implicit session =>
+        val partido_id: Long = partidosdb.filter(p => p.equipo1 === equipo1 && p.equipo2 === equipo2).first().id
+
+        if (partido_id > 0){
+          //meter o actualizar resultado
+          val q = for { res <- resultadosdb if res.partido_id === partido_id} yield (res)
+
+          q.list() match{
+            case Nil => resultadosdb.insert(new Resultado(partido_id, goles_equipo1, goles_equipo2))
+            case _ => {
+              val uq = for { res <- resultadosdb if res.partido_id === partido_id} yield (res.goles_equipo1,res.goles_equipo2)
+              uq.update((goles_equipo1,goles_equipo2))
+            }
+          }
+        }else{
+          logger.error(s"No se pudo encontrar el partido $equipo1 vs $equipo2")
+        }
+    }
+  }
 
   // si no existe en db, inserta el partido
   def insertarPartido(equipo1: String, equipo2: String, fecha: util.Date) = {

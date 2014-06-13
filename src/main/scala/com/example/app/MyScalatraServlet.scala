@@ -1,14 +1,10 @@
 package com.example.app
 
-import org.scalatra._
-import scalate.ScalateSupport
 import slick.driver.PostgresDriver.simple._
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter
-import java.security.MessageDigest
 import scala.collection.immutable.TreeMap
+import java.security.MessageDigest
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.util.Date
-import json._
-import org.json4s.{DefaultFormats, Formats}
 
 class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
   def md5(s: String) = new HexBinaryAdapter().marshal(MessageDigest.getInstance("MD5").digest(s.getBytes))
@@ -185,17 +181,62 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
         ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
   }
 
+  def calcularPuntaje(predicciones: List[Prediccion], resultados: List[Resultado]): Int = {
+    val puntosPorPrediccion:List[Int] = predicciones.map(prediccion => resultados.find(r => r.partido_id == prediccion.partido_id) match {
+      case None => 0
+      case Some(resultado) => {
+        var pts = 0;
+        //gano el equipo 1 y acerto
+        if ((resultado.goles_equipo1 > resultado.goles_equipo2) && (prediccion.goles_equipo1 > prediccion.goles_equipo2 ))
+          pts += 3;
+
+        //gano el equipo 2 y acerto
+        if ((resultado.goles_equipo1 < resultado.goles_equipo2) && (prediccion.goles_equipo1 < prediccion.goles_equipo2 ))
+          pts += 3;
+
+        //hubo empate y acerto
+        if ((resultado.goles_equipo1 == resultado.goles_equipo2) && (prediccion.goles_equipo1 == prediccion.goles_equipo2 ))
+          pts += 3;
+
+        //acerto el marcador?
+        if ((resultado.goles_equipo1 == prediccion.goles_equipo1) && (resultado.goles_equipo2 == prediccion.goles_equipo2)){
+          pts += 2;
+
+          //fue el unico que acerto el resultado para este partido?
+          val prediccionCount: Int = db.withSession{ implicit session => prediccionesdb.filter(p =>
+            ((p.partido_id === prediccion.partido_id) && (p.goles_equipo1 === resultado.goles_equipo1) && (p.goles_equipo2 === resultado.goles_equipo2))
+          ).list().size}
+          if (prediccionCount == 1)
+            pts += 1
+        }
+
+        pts
+      }
+    })
+
+    puntosPorPrediccion.sum
+  }
+
   get("/puntuaciones"){
     val loggedUser = session.getAttribute("user")
     contentType = "text/html"
 
     if (loggedUser != null){
-      val usuarios: List[(Usuario, (Int, Int))] = db.withSession{implicit session =>{
-        val usrs = usuariosdb.list()
-        val pos = usrs.map(u => (u.id.toInt, 0))
+      val usuarios: List[((Usuario, Int), Int)] = db.withSession{implicit session =>{
 
-        usrs.zip(pos)
+        val usrs = usuariosdb.list()
+        val resultados = resultadosdb.list()
+
+        val usuariosConPuntaje: List[(Usuario,Int)] = usrs.map(usr => {
+          val predicciones= prediccionesdb.filter(_.user_id === usr.id).list()
+          val pts = calcularPuntaje(predicciones, resultados)
+          logger.info("Calificando a "+usr.ident + " con " + predicciones.size + " predicciones y " + resultados.size + " resultados  ... "+pts)
+          (usr, pts )
+        })
+
+        usuariosConPuntaje.sortBy(_._2).reverse.zipWithIndex
       }}
+
       ssp("puntuaciones.ssp", "usuarios" -> usuarios, "user" -> session.getAttribute("user"), "mensajes" -> getMensajes)
     } else
       ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
@@ -210,8 +251,6 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
 
   post("/mensaje/:texto"){
     val loggedUser = session.getAttribute("user")
-    implicit val jsonFormats: Formats = DefaultFormats
-    //contentType = formats("json")
 
     if (loggedUser != null){
       val user: Usuario = loggedUser.asInstanceOf[Usuario]
