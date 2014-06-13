@@ -37,6 +37,7 @@ class ScalatraBootstrap extends LifeCycle with DatabaseSupport{
     insertarPartido("Brasil", "Croacia", at("12/06/2014 14:00"))
     insertarResultado("Brasil","Croacia", 3, 1)
     insertarPartido("México", "Camerún", at("13/06/2014 10:00"))
+    insertarResultado("México","Camerún", 1, 0)
     insertarPartido("Brasil", "México", at("17/06/2014 13:00"))
     insertarPartido("Camerún", "Croacia", at("18/06/2014 16:00"))
     insertarPartido("Camerún", "Brasil", at("23/06/2014 14:00"))
@@ -44,6 +45,7 @@ class ScalatraBootstrap extends LifeCycle with DatabaseSupport{
 
     // Grupo B
     insertarPartido("España", "Holanda", at("13/06/2014 13:00"))
+    //insertarResultado("España","Holanda", 1, 1)
     insertarPartido("Chile", "Australia", at("13/06/2014 16:00"))
     insertarPartido("España", "Chile", at("18/06/2014 13:00"))
     insertarPartido("Australia", "Holanda", at("18/06/2014 10:00"))

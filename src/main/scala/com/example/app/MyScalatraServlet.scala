@@ -266,4 +266,47 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
 
     redirect("/")
   }
+
+  get("/meter-resultado"){
+    val equipos: List[String] = db.withSession{ implicit session =>
+    val q = for { p <- partidosdb} yield p.equipo2
+    q.list()
+    }
+
+    ssp("meter-resultado.ssp", "equipos" -> equipos)
+  }
+
+  post("/meter-resultado"){
+    try {
+      val equipo1 = params("equipo1")
+      val equipo2 = params("equipo2")
+
+      val goles_equipo1 = params("goles_equipo1").toInt
+      val goles_equipo2 = params("goles_equipo2").toInt
+
+      insertarResultado(equipo1, equipo2, goles_equipo1, goles_equipo2)
+    } catch { case e: Exception => redirect("/meter-resultado")}
+  }
+
+  def insertarResultado(equipo1: String, equipo2: String, goles_equipo1: Int, goles_equipo2: Int) {
+    db.withSession{
+      implicit session =>
+        val partido_id: Long = partidosdb.filter(p => p.equipo1 === equipo1 && p.equipo2 === equipo2).first().id
+
+        if (partido_id > 0){
+          //meter o actualizar resultado
+          val q = for { res <- resultadosdb if res.partido_id === partido_id} yield (res)
+
+          q.list() match{
+            case Nil => resultadosdb.insert(new Resultado(partido_id, goles_equipo1, goles_equipo2))
+            case _ => {
+              val uq = for { res <- resultadosdb if res.partido_id === partido_id} yield (res.goles_equipo1,res.goles_equipo2)
+              uq.update((goles_equipo1,goles_equipo2))
+            }
+          }
+        }else{
+          logger.error(s"No se pudo encontrar el partido $equipo1 vs $equipo2")
+        }
+    }
+  }
 }
