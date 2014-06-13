@@ -147,7 +147,7 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
         val user: Usuario= loggedUser.asInstanceOf[Usuario]
 
         //por cada partido, obtener la prediccion
-        val partidos = db.withSession{
+        val partidos: List[Partido] = db.withSession{
         implicit session => {
           partidosdb.list()
         }}
@@ -165,14 +165,16 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
           new Prediccion(-1, user.id, partido.id, goles_equipo1, goles_equipo2)
         })
 
+        val now = new Date();
+
         db.withSession{ implicit session => {
           predicciones.foreach(p => {
-            //if( ! prediccionesdb.filter(pdb => pdb.user_id === p.user_id && pdb.partido_id === p.partido_id).exists.run )
-            //  prediccionesdb.insert(p)
-            //else{
+            //si es valido
+            val partido = partidos.find(_.id == p.partido_id).get
+            if (partido.fecha.after(now)){
               val q = for { pdb <- prediccionesdb if pdb.user_id === p.user_id && pdb.partido_id === p.partido_id } yield (pdb.goles_equipo1, pdb.goles_equipo2)
               q.update((p.goles_equipo1, p.goles_equipo2))
-            //}
+            }
           })
         }}
 

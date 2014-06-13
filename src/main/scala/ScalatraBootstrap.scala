@@ -35,7 +35,7 @@ class ScalatraBootstrap extends LifeCycle with DatabaseSupport{
 
     // Grupo A
     insertarPartido("Brasil", "Croacia", at("12/06/2014 14:00"))
-    insertarResultado("Brasil","Croacia", 1, 1)
+    insertarResultado("Brasil","Croacia", 3, 1)
     insertarPartido("México", "Camerún", at("13/06/2014 10:00"))
     insertarPartido("Brasil", "México", at("17/06/2014 13:00"))
     insertarPartido("Camerún", "Croacia", at("18/06/2014 16:00"))

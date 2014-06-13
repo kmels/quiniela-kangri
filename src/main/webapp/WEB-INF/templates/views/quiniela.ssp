@@ -9,7 +9,7 @@
 
 <form action="/update" method="POST">
 <div class="quiniela-container row">
-    <div class="col-xs-8">
+    <div class="col-md-8">
 
     #for ((fecha,predicciones) <- prediccionesPorFecha)
         <h4>${df.format(fecha)}</h4>
@@ -49,8 +49,10 @@
     #end
     </div>
 
-    <div class="col-xs-4" style="position:fixed; right:0;">
-        <button type="submit" class="btn btn-success btn-lg">Guardar</button>
+    <div class="col-md-4">
+        <div  style="position:fixed; right:0;">
+            <button type="submit" class="btn btn-success btn-lg">Guardar</button>
+        </div>
 
         <% render("/WEB-INF/templates/views/chat.ssp",
                Map("mensajes" -> mensajes, "user" -> user, "collapsed" -> true))

@@ -14,7 +14,7 @@
      <tbody>
       #for (((u,pts),pos) <- usuarios)
       <tr>
-          <td>${pos}</td>
+          <td>${(pos + 1)}</td>
           <td>${u.ident}</td>
           <td>${pts}</td>
       </tr>
