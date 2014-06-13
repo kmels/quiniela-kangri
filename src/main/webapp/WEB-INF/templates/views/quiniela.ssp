@@ -54,9 +54,11 @@
             <button type="submit" class="btn btn-success btn-lg">Guardar</button>
         </div>
 
-        <% render("/WEB-INF/templates/views/chat.ssp",
-               Map("mensajes" -> mensajes, "user" -> user, "collapsed" -> true))
-        %>
+        <div style="position: fixed; right:0; margin-top: 60px;">
+            <% render("/WEB-INF/templates/views/chat.ssp",
+                   Map("mensajes" -> mensajes, "user" -> user, "collapsed" -> true))
+            %>
+        </div>
     </div>
 </div>
 
