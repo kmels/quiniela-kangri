@@ -14,9 +14,9 @@
      <tbody>
       #for (((u,pts),pos) <- usuarios)
       <tr>
-          <td>${(pos + 1)}</td>
-          <td>${u.ident}</td>
-          <td>${pts}</td>
+          <td><a href="/predicciones/${u.ident}">${(pos + 1)}</a></td>
+          <td><a href="/predicciones/${u.ident}">${u.ident}</a></td>
+          <td><a href="/predicciones/${u.ident}">${pts}</a></td>
       </tr>
       #end
      </tbody>

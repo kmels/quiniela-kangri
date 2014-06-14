@@ -7,7 +7,7 @@
    #end
 
    #if (warning != "")
-    <div class='alert alert-warning'>${info}</div>
+    <div class='alert alert-warning'>${warning}</div>
    #end
 
    #if (info != "")

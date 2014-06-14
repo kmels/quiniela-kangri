@@ -1,0 +1,56 @@
+<% import java.text.SimpleDateFormat %>
+<% import com.example.app._ %>
+<% import java.util.Date %>
+
+<%@ val prediccionesPorFecha: Map[java.util.Date,List[(Partido,Prediccion)]] %>
+<%@ val df: SimpleDateFormat = new SimpleDateFormat("d/MM/yyyy") %>
+<%@ val tf: SimpleDateFormat = new SimpleDateFormat("hh:mm") %>
+<%@ val title: String = "Predicciones" %>
+<%@ val mensajes: List[((MensajeChat,Usuario), Int)] %>
+<%@ val user: Usuario = null%>
+<%@ val now: Date = new Date() %>
+<%@ val ident: String %>
+
+<h2>Predicciones por ${ident}</h2>
+
+<div class="quiniela-container row">
+    <div class="col-md-8">
+
+    #for ((fecha,predicciones) <- prediccionesPorFecha)
+        #for ((partido,prediccion) <- predicciones)
+            #if (partido.fecha.before(now))
+                <div style="height:150px;">
+                <div class="pull-left text-center country-container">
+                    ${partido.equipo1}
+                    <br>
+                    <img src="/images/flags/${partido.equipo1}.png">
+                    <br>
+                    <h4>
+                        #if (prediccion.goles_equipo1 >= 0)
+                            ${prediccion.goles_equipo1}
+                        #end
+                    </h4>
+                </div>
+
+                <div class="pull-left text-center country-container">
+                    <h4>VS</h4>
+                </div>
+
+                <div class="pull-left text-center country-container">
+                    ${partido.equipo2}
+                    <br>
+                    <img src="/images/flags/${partido.equipo2}.png">
+                    <br>
+                    <h4>
+                        #if (prediccion.goles_equipo2 >= 0)
+                            ${prediccion.goles_equipo2}
+                        #end
+                    </h4>
+                </div>
+                </div>
+            #end
+        #end
+    #end
+    </div>
+
+</div>

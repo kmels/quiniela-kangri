@@ -82,7 +82,7 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
       }
       case _ => {
         logger.info("Login fallo")
-        ssp("login.ssp", "warning" -> "Usuario/contrase&ntilde;a mala")
+        ssp("login.ssp", "warning" -> "Usuario/contraseña mala")
       }
     }
   }
@@ -134,6 +134,44 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
       }
 
       ssp("quiniela.ssp", "mensajes" -> getMensajes, "prediccionesPorFecha" -> prediccionesPorFecha, "user" -> session.getAttribute("user"))
+    } else {
+      ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
+    }
+  }
+
+  get("/predicciones/:ident"){
+    val user = session.getAttribute("user")
+    contentType = "text/html"
+
+    if (user != null){
+      val partidos: List[Partido] = db.withSession{
+        implicit session =>
+          partidosdb.list()
+      }
+
+      //val loggedUser = user.asInstanceOf[Usuario]
+      val userID: Long = db.withSession{ implicit session =>
+        usuariosdb.filter(_.ident === params("ident")).firstOption.fold(-1L)(u => u.id)
+      }
+
+      val predicciones: List[(Partido,Prediccion)] = db.withSession{
+        implicit session =>
+        //prediccines del usuario logueado
+        //producto punto con partidos (join con partidos)
+        val q = for {
+            pa <- partidosdb
+            pr <- prediccionesdb if (pr.partido_id === pa.id && pr.user_id === userID)
+        } yield (pa, pr)
+
+        q.list()
+      }
+
+      val prediccionesPorFecha: TreeMap[Date,List[(Partido,Prediccion)]] = {
+        val m = predicciones.groupBy(pp => pp._1.fecha)
+        TreeMap(m.toSeq:_*)
+      }
+
+      ssp("predicciones_jugador.ssp", "ident" -> params("ident"), "mensajes" -> getMensajes, "prediccionesPorFecha" -> prediccionesPorFecha, "user" -> session.getAttribute("user"))
     } else {
       ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
     }
