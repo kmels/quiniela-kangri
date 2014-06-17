@@ -14,9 +14,4 @@ If `browse` doesn't launch your browser, manually open [http://localhost:56474/]
  * [http://www.scala-sbt.org/](scala-sbt)
  * postgresql
 
-## TODO ##
-
- * No se puede editar después de que un partido haya pasado
- * Mostrar puntaje
- * Mostrar predicciones pasadas de los demas
 
