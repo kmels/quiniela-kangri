@@ -263,14 +263,14 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
 
     if (loggedUser != null){
       val usuarios: List[((Usuario, Int), Int)] = db.withSession{implicit session =>{
-
+      logger.info(loggedUser.asInstanceOf[Usuario].ident+ " anda viendo las puntuaciones")
         val usrs = usuariosdb.list()
         val resultados = resultadosdb.list()
 
         val usuariosConPuntaje: List[(Usuario,Int)] = usrs.map(usr => {
           val predicciones= prediccionesdb.filter(_.user_id === usr.id).list()
           val pts = calcularPuntaje(predicciones, resultados)
-          logger.info("Calificando a "+usr.ident + " con " + predicciones.size + " predicciones y " + resultados.size + " resultados  ... "+pts)
+          //logger.info("Calificando a "+usr.ident + " con " + predicciones.size + " predicciones y " + resultados.size + " resultados  ... "+pts)
           (usr, pts )
         })
 
