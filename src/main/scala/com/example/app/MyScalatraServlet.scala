@@ -5,6 +5,8 @@ import scala.collection.immutable.TreeMap
 import java.security.MessageDigest
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 import java.util.Date
+import scala.collection.mutable.HashMap
+import java.util.Calendar
 
 class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
   def md5(s: String) = new HexBinaryAdapter().marshal(MessageDigest.getInstance("MD5").digest(s.getBytes))
@@ -221,37 +223,39 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
         ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
   }
 
+  def calcularPuntos(prediccion: Prediccion, resultado: Resultado): Int = {
+    var pts = 0;
+    //gano el equipo 1 y acerto
+    if ((resultado.goles_equipo1 > resultado.goles_equipo2) && (prediccion.goles_equipo1 > prediccion.goles_equipo2 ))
+      pts += 3;
+
+    //gano el equipo 2 y acerto
+    if ((resultado.goles_equipo1 < resultado.goles_equipo2) && (prediccion.goles_equipo1 < prediccion.goles_equipo2 ))
+      pts += 3;
+
+    //hubo empate y acerto
+    if ((resultado.goles_equipo1 == resultado.goles_equipo2) && (prediccion.goles_equipo1 == prediccion.goles_equipo2 ))
+      pts += 3;
+
+    //acerto el marcador?
+    if ((resultado.goles_equipo1 == prediccion.goles_equipo1) && (resultado.goles_equipo2 == prediccion.goles_equipo2)){
+      pts += 2;
+
+      //fue el unico que acerto el resultado para este partido?
+      val prediccionCount: Int = db.withSession{ implicit session => prediccionesdb.filter(p =>
+        ((p.partido_id === prediccion.partido_id) && (p.goles_equipo1 === resultado.goles_equipo1) && (p.goles_equipo2 === resultado.goles_equipo2))
+      ).list().size}
+      if (prediccionCount == 1)
+        pts += 1
+    }
+
+    pts
+  }
+
   def calcularPuntaje(predicciones: List[Prediccion], resultados: List[Resultado]): Int = {
     val puntosPorPrediccion:List[Int] = predicciones.map(prediccion => resultados.find(r => r.partido_id == prediccion.partido_id) match {
       case None => 0
-      case Some(resultado) => {
-        var pts = 0;
-        //gano el equipo 1 y acerto
-        if ((resultado.goles_equipo1 > resultado.goles_equipo2) && (prediccion.goles_equipo1 > prediccion.goles_equipo2 ))
-          pts += 3;
-
-        //gano el equipo 2 y acerto
-        if ((resultado.goles_equipo1 < resultado.goles_equipo2) && (prediccion.goles_equipo1 < prediccion.goles_equipo2 ))
-          pts += 3;
-
-        //hubo empate y acerto
-        if ((resultado.goles_equipo1 == resultado.goles_equipo2) && (prediccion.goles_equipo1 == prediccion.goles_equipo2 ))
-          pts += 3;
-
-        //acerto el marcador?
-        if ((resultado.goles_equipo1 == prediccion.goles_equipo1) && (resultado.goles_equipo2 == prediccion.goles_equipo2)){
-          pts += 2;
-
-          //fue el unico que acerto el resultado para este partido?
-          val prediccionCount: Int = db.withSession{ implicit session => prediccionesdb.filter(p =>
-            ((p.partido_id === prediccion.partido_id) && (p.goles_equipo1 === resultado.goles_equipo1) && (p.goles_equipo2 === resultado.goles_equipo2))
-          ).list().size}
-          if (prediccionCount == 1)
-            pts += 1
-        }
-
-        pts
-      }
+      case Some(resultado) => calcularPuntos(prediccion, resultado)
     })
 
     puntosPorPrediccion.sum
@@ -262,22 +266,91 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
     contentType = "text/html"
 
     if (loggedUser != null){
-      val usuarios: List[((Usuario, Int), Int)] = db.withSession{implicit session =>{
-      logger.info(loggedUser.asInstanceOf[Usuario].ident+ " anda viendo las puntuaciones")
+      val ahorita = new Date();
+
+      val puntosPorDiaPorUsuario: List[(Usuario,Map[Date,Int])] = db.withSession{implicit session =>{
+
         val usrs = usuariosdb.list()
         val resultados = resultadosdb.list()
 
-        val usuariosConPuntaje: List[(Usuario,Int)] = usrs.map(usr => {
-          val predicciones= prediccionesdb.filter(_.user_id === usr.id).list()
-          val pts = calcularPuntaje(predicciones, resultados)
-          //logger.info("Calificando a "+usr.ident + " con " + predicciones.size + " predicciones y " + resultados.size + " resultados  ... "+pts)
-          (usr, pts )
+        val usuariosConPuntaje: List[(Usuario,Map[Date,Int])] = usrs.map(usr => {
+          val prediccionesHastaHoy = for {
+            pa <- partidosdb
+            pr <- prediccionesdb if (pr.partido_id === pa.id && pr.user_id === usr.id)
+          } yield (pr, pa.fecha)
+
+          val predicciones_por_dia: Map[Date, List[Prediccion]] =
+            prediccionesHastaHoy.list() //fetch
+            .filter(_._2.before(ahorita))
+            .map{ case (prediccion, fecha) => { //cambiar fecha a dia
+              val dia = fecha
+              dia.setHours(0);
+              dia.setMinutes(0)
+              dia.setSeconds(0)
+              (dia,prediccion)
+            }}
+           .groupBy(_._1)
+           .map{ case (dia, predicciones_f) => (dia, predicciones_f.map(_._2))}
+
+          val puntos_por_dia: Map[Date, Int] = predicciones_por_dia.map{
+            case (fecha,predicciones) => {
+              val puntos_por_prediccion: List[Int] = predicciones.map(prediccion => {
+                val resultado = resultados.find(_.partido_id == prediccion.partido_id)
+                resultado.fold(0)(res => calcularPuntos(prediccion, res))
+              })
+
+              (fecha,puntos_por_prediccion.sum)
+            }
+          }
+
+          (usr,puntos_por_dia)
         })
 
-        usuariosConPuntaje.sortBy(_._2).reverse.zipWithIndex
+        usuariosConPuntaje
       }}
 
-      ssp("puntuaciones.ssp", "usuarios" -> usuarios, "user" -> session.getAttribute("user"), "mensajes" -> getMensajes)
+      val usuarios: List[((Usuario, Int), Int)] = puntosPorDiaPorUsuario.map{
+        case (usuario, puntos_por_dia) => {
+          val puntuacion = puntos_por_dia.map(_._2).sum
+          (usuario, puntuacion)
+        }
+      }.sortBy(_._2).reverse.zipWithIndex
+
+      //List[(Usuario,Map[Date,Int])] -> Map[(Date,List[Usuario,Int])]
+      val puntosAcumuladosPorUsuarioPorDia: HashMap[Date,HashMap[Usuario,Int]] = new HashMap()//[(Date,List[(Usuario,Int)])]()
+
+      puntosPorDiaPorUsuario.foreach{
+        case (usr, puntosPorDia) => {
+          puntosPorDia.toList.sortBy(_._1).foreach{ case (dia, puntos) => {
+            val diaAnterior = Calendar.getInstance()
+            diaAnterior.setTime(dia)
+            diaAnterior.add(Calendar.DAY_OF_MONTH, -1)
+
+            if (!puntosAcumuladosPorUsuarioPorDia.contains(diaAnterior.getTime))
+              logger.debug ("El dia antes de "+dia + " es "+diaAnterior.getTime)
+
+            // al dia anterior, mapa de puntos acumulados
+            val puntosAcumuladosGente: HashMap[Usuario, Int] = puntosAcumuladosPorUsuarioPorDia
+              .getOrElseUpdate(diaAnterior.getTime,HashMap())
+
+            val puntosAcumulados: Int = puntosAcumuladosGente.getOrElseUpdate(usr,0)
+
+            //nuevo dia
+            if (!puntosAcumuladosPorUsuarioPorDia.contains(dia))
+              logger.debug("Acumulando el dia "+dia)
+
+            val nuevosPuntosAcumulados: HashMap[Usuario,Int] = puntosAcumuladosPorUsuarioPorDia.getOrElseUpdate(dia, HashMap())
+
+            nuevosPuntosAcumulados.put(usr, puntosAcumulados + puntos)
+
+            puntosAcumuladosPorUsuarioPorDia.put(dia, nuevosPuntosAcumulados)
+          }}
+        }
+      }
+
+      logger.debug("Acumulamos " +puntosAcumuladosPorUsuarioPorDia.size)
+
+      ssp("puntuaciones.ssp", "puntosAcumuladosPorUsuarioPorDia" -> puntosAcumuladosPorUsuarioPorDia.toList.sortBy(_._1), "usuarios" -> usuarios, "user" -> session.getAttribute("user"), "mensajes" -> getMensajes)
     } else
       ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
   }
