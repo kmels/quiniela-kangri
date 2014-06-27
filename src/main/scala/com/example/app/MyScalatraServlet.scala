@@ -286,35 +286,45 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
         if (prediccionCount == 1)
           pts += 1
       }
-    } else{
+    } else {
       //octavos
-      if (resultado.partido_id <= 56){
-        val ganador_predicto: GanadorPredicto = db.withSession(implicit session =>
-          ganadoresPredictosdb.filter(gp => gp.partido_id === resultado.partido_id && gp.user_id === prediccion.user_id).first())
+      if (resultado.partido_id <= 56) {
+        //gano el equipo 1 y acerto
+        if ((resultado.goles_equipo1 > resultado.goles_equipo2) && (prediccion.goles_equipo1 > prediccion.goles_equipo2))
+          pts += 4;
 
-        val ganador: Ganador = db.withSession(implicit session =>
-          ganadoresdb.filter(ganador => ganador.partido_id === resultado.partido_id).first()
-        )
+        //gano el equipo 2 y acerto
+        if ((resultado.goles_equipo1 < resultado.goles_equipo2) && (prediccion.goles_equipo1 < prediccion.goles_equipo2))
+          pts += 4;
 
-        //acerto ganador
-        if (ganador_predicto.equipo == ganador.equipo)
-          pts += 4
+        //hubo empate y acerto
+        if ((resultado.goles_equipo1 == resultado.goles_equipo2) && (prediccion.goles_equipo1 == prediccion.goles_equipo2)) {
+          pts += 4;
 
-        //acerto marcador
+          //acerto al que prevalece
+          val ganador_predicto: GanadorPredicto = db.withSession(implicit session =>
+            ganadoresPredictosdb.filter(gp => gp.partido_id === resultado.partido_id && gp.user_id === prediccion.user_id).first())
+          val ganador: Ganador = db.withSession(implicit session =>
+            ganadoresdb.filter(ganador => ganador.partido_id === resultado.partido_id).first()
+          )
+          if (ganador_predicto.equipo == ganador.equipo)
+            pts += 1
+        }
+
         //acerto el marcador?
         if ((resultado.goles_equipo1 == prediccion.goles_equipo1) && (resultado.goles_equipo2 == prediccion.goles_equipo2)) {
           pts += 2;
 
-        //fue el unico que acerto el resultado para este partido?
-        val prediccionCount: Int = db.withSession { implicit session => prediccionesdb.filter(p =>
-          ((p.partido_id === prediccion.partido_id) && (p.goles_equipo1 === resultado.goles_equipo1) && (p.goles_equipo2 === resultado.goles_equipo2))
+          //fue el unico que acerto el resultado para este partido?
+          val prediccionCount: Int = db.withSession { implicit session => prediccionesdb.filter(p =>
+            ((p.partido_id === prediccion.partido_id) && (p.goles_equipo1 === resultado.goles_equipo1) && (p.goles_equipo2 === resultado.goles_equipo2))
           ).list().size
+          }
+          if (prediccionCount == 1)
+            pts += 1
         }
-        if (prediccionCount == 1)
-          pts += 1
-        }
-      } //end octavos
-  }
+      }
+    }
 
     pts
   }
