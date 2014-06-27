@@ -5,6 +5,7 @@
 <%@ val tf: SimpleDateFormat = new SimpleDateFormat("hh:mm") %>
 <%@ val title: String = "Predicciones" %>
 <%@ val mensajes: List[((MensajeChat,Usuario), Int)] %>
+<%@ val ganador_predicto: Map[Long, String] %>
 <%@ val user: Usuario = null%>
 
 <form action="/update" method="POST">
@@ -16,21 +17,28 @@
 
         #for ((partido,prediccion) <- predicciones)
             <div style="height:150px;">
+
             <div class="pull-left text-center country-container">
                 ${partido.equipo1}
                 <br>
                 <img src="/images/flags/${partido.equipo1}.png">
-                <br>
                 <input
                     #if (prediccion.goles_equipo1 >= 0)
                         value="${prediccion.goles_equipo1}"
                     #end
-                        name="${partido.id}_goles_equipo1" type="number" class="form-control score-input">
+                        name="${partido.id}_goles_equipo1" type="number" class="form-control score-input"/>
             </div>
 
-            <div class="pull-left text-center country-container">
+            <div class="pull-left text-center country-container" style="margin: 5px;">
                 <h4>${tf.format(fecha)}</h4>
-                <h4>VS</h4>
+                #if (partido.id > 48)<h4>Prevalece</h4>
+                    <select id="ganador_${partido.id}" name="${partido.id}_ganador_predicto" class="btn">
+                        <option value=""></option>
+                        <option value="${partido.equipo1}">${partido.equipo1}</option>
+                        <option value="${partido.equipo2}">${partido.equipo2}</option>
+                    </select>
+                    <script type="text/javascript">$("#ganador_${partido.id}").val("${ganador_predicto.get(partido.id)}");</script>
+                #end
             </div>
 
             <div class="pull-left text-center country-container">

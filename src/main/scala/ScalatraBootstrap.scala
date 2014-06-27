@@ -23,6 +23,10 @@ class ScalatraBootstrap extends LifeCycle with DatabaseSupport{
           (mensajesChat.ddl).create
         if (MTable.getTables("resultados").list().isEmpty)
           (resultadosdb.ddl).create
+        if (MTable.getTables("ganador_predicto").list().isEmpty)
+          (ganadoresPredictosdb.ddl).create
+        if (MTable.getTables("ganadores").list().isEmpty)
+          (ganadoresdb.ddl).create
     }
 
     primeraRonda()
@@ -99,6 +103,17 @@ class ScalatraBootstrap extends LifeCycle with DatabaseSupport{
     insertarPartido("Corea del Sur", "Algeria", at("22/06/2014 13:00"))
     insertarPartido("Algeria", "Rusia", at("26/06/2014 14:00"))
     insertarPartido("Corea del Sur", "Bélgica", at("26/06/2014 14:00"))
+
+    //octavos de final
+    insertarPartido("Brasil", "Chile", at("28/06/2014 10:00"))
+    insertarPartido("Colombia", "Uruguay", at("28/06/2014 14:00"))
+    insertarPartido("Holanda", "México", at("29/06/2014 10:00"))
+    insertarPartido("Costa Rica", "Grecia", at("29/06/2014 14:00"))
+
+    insertarPartido("Francia", "Nigeria", at("30/06/2014 10:00"))
+    insertarPartido("Alemania", "Algeria", at("30/06/2014 14:00"))
+    insertarPartido("Argentina", "Suiza", at("01/07/2014 10:00"))
+    insertarPartido("Bélgica", "Estados Unidos", at("01/07/2014 14:00"))
   }
 
   def at(p: String) = dateFormat.parse(p)

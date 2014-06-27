@@ -15,6 +15,8 @@ case class Usuario(id: Long, ident: String, pw: String)
 case class Prediccion(id: Long, user_id: Long, partido_id: Long, goles_equipo1: Int, goles_equipo2: Int)
 case class Partido(id: Long, equipo1: String, equipo2: String, fecha: Date)
 case class Resultado(partido_id: Long, goles_equipo1: Int, goles_equipo2: Int)
+case class GanadorPredicto(partido_id: Long, user_id: Long, equipo: String)
+case class Ganador(partido_id: Long, equipo: String)
 case class MensajeChat(id: Long, autor_id: Long, texto: String, fecha_emision: Date)
 
 class MensajesChat(tag: Tag) extends Table[MensajeChat](tag, "mensajes_chat"){
@@ -38,6 +40,21 @@ class Usuarios(tag: Tag) extends Table[Usuario](tag, "usuarios"){
   def pw = column[String]("pw")
 
   def * = (id, ident, pw) <> (Usuario.tupled, Usuario.unapply)
+}
+
+class GanadoresPredictos(tag: Tag) extends Table[GanadorPredicto](tag, "ganador_predicto"){
+  def partido_id = column[Long]("partido_id")
+  def user_id = column[Long]("user_id")
+  def equipo = column[String]("equipo_predicto")
+
+  def * = (partido_id, user_id, equipo) <> (GanadorPredicto.tupled, GanadorPredicto.unapply)
+}
+
+class Ganadores(tag: Tag) extends Table[Ganador](tag, "ganadores"){
+  def partido_id = column[Long]("partido_id")
+  def equipo = column[String]("equipo_ganador")
+
+  def * = (partido_id, equipo) <> (Ganador.tupled, Ganador.unapply)
 }
 
 class Predicciones(tag: Tag) extends Table[Prediccion](tag, "predicciones"){

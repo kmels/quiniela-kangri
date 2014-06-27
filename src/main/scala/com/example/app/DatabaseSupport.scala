@@ -31,4 +31,6 @@ trait DatabaseSupport {
   val prediccionesdb = TableQuery[Predicciones]
   val mensajesChat = TableQuery[MensajesChat]
   val resultadosdb = TableQuery[Resultados]
+  val ganadoresPredictosdb = TableQuery[GanadoresPredictos]
+  val ganadoresdb = TableQuery[Ganadores]
 }

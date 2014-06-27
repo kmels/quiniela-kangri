@@ -10,6 +10,7 @@
 <%@ val user: Usuario = null%>
 <%@ val now: Date = new Date() %>
 <%@ val ident: String %>
+<%@ val ganador_predicto: Map[Long, String] %>
 
 <h2>Predicciones por ${ident}</h2>
 
@@ -32,8 +33,16 @@
                     </h4>
                 </div>
 
-                <div class="pull-left text-center country-container">
+                <div class="pull-left text-center country-container" style="margin: 5px;">
                     <h4>VS</h4>
+                    #if (partido.id > 48)<h4>Prevalece</h4>
+                        <select id="ganador_${partido.id}" name="${partido.id}_ganador_predicto" class="btn">
+                            <option value=""></option>
+                            <option value="${partido.equipo1}">${partido.equipo1}</option>
+                            <option value="${partido.equipo2}">${partido.equipo2}</option>
+                        </select>
+                        <script type="text/javascript">$("#ganador_${partido.id}").val("${ganador_predicto.get(partido.id)}");</script>
+                    #end
                 </div>
 
                 <div class="pull-left text-center country-container">

@@ -113,13 +113,23 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
       val predicciones: List[(Partido,Prediccion)] = db.withSession{
         implicit session =>
           //prediccines del usuario logueado
-          val ps: List[Prediccion] = prediccionesdb.filter(_.user_id === loggedUser.id).list()
+          val predix: List[Prediccion] = prediccionesdb.filter(_.user_id === loggedUser.id).list()
 
-          //si no tiene ni una, crearle
-          if (ps.isEmpty){
-            val newPs = partidosdb.list().map(p => new Prediccion(-1, loggedUser.id, p.id, -1, -1))
-            newPs.foreach(prediccionVacia => prediccionesdb.insert(prediccionVacia))
-          }
+          //partidos que no tienen prediccion
+          val partis = partidosdb.list()
+          val sin_prediccion = partis.filter(parti => !predix.exists(predi => predi.partido_id == parti.id))
+
+          sin_prediccion.foreach(prti => {
+            prediccionesdb.insert(new Prediccion(-1, loggedUser.id, prti.id, -1, -1))
+          })
+
+
+          //partidos que no tienen ganador
+          val ganadores_predictos= ganadoresPredictosdb.list()
+          val sin_ganador = partis.filter(parti => ((!ganadores_predictos.exists(gp => gp.partido_id == parti.id)) && (parti.id > 48)))
+          sin_ganador.foreach(prti => {
+            ganadoresPredictosdb.insert(new GanadorPredicto(prti.id, loggedUser.id, ""))
+          });
 
           //producto punto con partidos (join con partidos)
           val q = for {
@@ -135,7 +145,11 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
         TreeMap(m.toSeq:_*)
       }
 
-      ssp("quiniela.ssp", "mensajes" -> getMensajes, "prediccionesPorFecha" -> prediccionesPorFecha, "user" -> session.getAttribute("user"))
+      val ganador_predicto: Map[Long,String] = db.withSession(implicit session => {
+        ganadoresPredictosdb.filter(_.user_id === loggedUser.id).map(ganador_predicto => (ganador_predicto.partido_id, ganador_predicto.equipo)).toMap
+      })
+
+      ssp("quiniela.ssp", "mensajes" -> getMensajes, "ganador_predicto" -> ganador_predicto, "prediccionesPorFecha" -> prediccionesPorFecha, "user" -> session.getAttribute("user"))
     } else {
       ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
     }
@@ -173,7 +187,11 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
         TreeMap(m.toSeq:_*)
       }
 
-      ssp("predicciones_jugador.ssp", "ident" -> params("ident"), "mensajes" -> getMensajes, "prediccionesPorFecha" -> prediccionesPorFecha, "user" -> session.getAttribute("user"))
+      val ganador_predicto: Map[Long,String] = db.withSession(implicit session => {
+        ganadoresPredictosdb.filter(_.user_id === userID).map(ganador_predicto => (ganador_predicto.partido_id, ganador_predicto.equipo)).toMap
+      })
+
+      ssp("predicciones_jugador.ssp", "ident" -> params("ident"), "ganador_predicto" -> ganador_predicto, "mensajes" -> getMensajes, "prediccionesPorFecha" -> prediccionesPorFecha, "user" -> session.getAttribute("user"))
     } else {
       ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
     }
@@ -205,6 +223,14 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
           new Prediccion(-1, user.id, partido.id, goles_equipo1, goles_equipo2)
         })
 
+        val ganadores_predictos: List[GanadorPredicto] = partidos.filter(_.id > 48).map(partido => {
+          val ganador: String = try{
+            params(partido.id + "_ganador_predicto")
+          } catch {case e: Exception => ""}
+
+          new GanadorPredicto(partido.id, user.id, ganador)
+        })
+
         val now = new Date();
 
         db.withSession{ implicit session => {
@@ -216,6 +242,15 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
               q.update((p.goles_equipo1, p.goles_equipo2))
             }
           })
+
+          ganadores_predictos.foreach(ganador_predicto => {
+            val partido = partidos.find(_.id == ganador_predicto.partido_id).get
+            if (partido.fecha.after(now)){
+              val q = for { gp <- ganadoresPredictosdb if gp.user_id === ganador_predicto.user_id && gp.partido_id === ganador_predicto.partido_id }
+              yield (gp.equipo)
+              q.update(ganador_predicto.equipo)
+            }
+          })
         }}
 
         redirect("/quiniela")
@@ -225,29 +260,61 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
 
   def calcularPuntos(prediccion: Prediccion, resultado: Resultado): Int = {
     var pts = 0;
-    //gano el equipo 1 y acerto
-    if ((resultado.goles_equipo1 > resultado.goles_equipo2) && (prediccion.goles_equipo1 > prediccion.goles_equipo2 ))
-      pts += 3;
 
-    //gano el equipo 2 y acerto
-    if ((resultado.goles_equipo1 < resultado.goles_equipo2) && (prediccion.goles_equipo1 < prediccion.goles_equipo2 ))
-      pts += 3;
+    if (resultado.partido_id <= 48) {
+      //gano el equipo 1 y acerto
+      if ((resultado.goles_equipo1 > resultado.goles_equipo2) && (prediccion.goles_equipo1 > prediccion.goles_equipo2))
+        pts += 3;
 
-    //hubo empate y acerto
-    if ((resultado.goles_equipo1 == resultado.goles_equipo2) && (prediccion.goles_equipo1 == prediccion.goles_equipo2 ))
-      pts += 3;
+      //gano el equipo 2 y acerto
+      if ((resultado.goles_equipo1 < resultado.goles_equipo2) && (prediccion.goles_equipo1 < prediccion.goles_equipo2))
+        pts += 3;
 
-    //acerto el marcador?
-    if ((resultado.goles_equipo1 == prediccion.goles_equipo1) && (resultado.goles_equipo2 == prediccion.goles_equipo2)){
-      pts += 2;
+      //hubo empate y acerto
+      if ((resultado.goles_equipo1 == resultado.goles_equipo2) && (prediccion.goles_equipo1 == prediccion.goles_equipo2))
+        pts += 3;
 
-      //fue el unico que acerto el resultado para este partido?
-      val prediccionCount: Int = db.withSession{ implicit session => prediccionesdb.filter(p =>
-        ((p.partido_id === prediccion.partido_id) && (p.goles_equipo1 === resultado.goles_equipo1) && (p.goles_equipo2 === resultado.goles_equipo2))
-      ).list().size}
-      if (prediccionCount == 1)
-        pts += 1
-    }
+      //acerto el marcador?
+      if ((resultado.goles_equipo1 == prediccion.goles_equipo1) && (resultado.goles_equipo2 == prediccion.goles_equipo2)) {
+        pts += 2;
+
+        //fue el unico que acerto el resultado para este partido?
+        val prediccionCount: Int = db.withSession { implicit session => prediccionesdb.filter(p =>
+          ((p.partido_id === prediccion.partido_id) && (p.goles_equipo1 === resultado.goles_equipo1) && (p.goles_equipo2 === resultado.goles_equipo2))
+        ).list().size
+        }
+        if (prediccionCount == 1)
+          pts += 1
+      }
+    } else{
+      //octavos
+      if (resultado.partido_id <= 56){
+        val ganador_predicto: GanadorPredicto = db.withSession(implicit session =>
+          ganadoresPredictosdb.filter(gp => gp.partido_id === resultado.partido_id && gp.user_id === prediccion.user_id).first())
+
+        val ganador: Ganador = db.withSession(implicit session =>
+          ganadoresdb.filter(ganador => ganador.partido_id === resultado.partido_id).first()
+        )
+
+        //acerto ganador
+        if (ganador_predicto.equipo == ganador.equipo)
+          pts += 4
+
+        //acerto marcador
+        //acerto el marcador?
+        if ((resultado.goles_equipo1 == prediccion.goles_equipo1) && (resultado.goles_equipo2 == prediccion.goles_equipo2)) {
+          pts += 2;
+
+        //fue el unico que acerto el resultado para este partido?
+        val prediccionCount: Int = db.withSession { implicit session => prediccionesdb.filter(p =>
+          ((p.partido_id === prediccion.partido_id) && (p.goles_equipo1 === resultado.goles_equipo1) && (p.goles_equipo2 === resultado.goles_equipo2))
+          ).list().size
+        }
+        if (prediccionCount == 1)
+          pts += 1
+        }
+      } //end octavos
+  }
 
     pts
   }
