@@ -123,9 +123,9 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
             prediccionesdb.insert(new Prediccion(-1, loggedUser.id, prti.id, -1, -1))
           })
 
-
           //partidos que no tienen ganador
-          val ganadores_predictos= ganadoresPredictosdb.list()
+          val ganadores_predictos: List[GanadorPredicto] = ganadoresPredictosdb.filter(_.user_id === loggedUser.id).list()
+
           val sin_ganador = partis.filter(parti => ((!ganadores_predictos.exists(gp => gp.partido_id == parti.id)) && (parti.id > 48)))
           sin_ganador.foreach(prti => {
             ganadoresPredictosdb.insert(new GanadorPredicto(prti.id, loggedUser.id, ""))
@@ -302,13 +302,17 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
           pts += 4;
 
           //acerto al que prevalece
-          val ganador_predicto: GanadorPredicto = db.withSession(implicit session =>
-            ganadoresPredictosdb.filter(gp => gp.partido_id === resultado.partido_id && gp.user_id === prediccion.user_id).first())
-          val ganador: Ganador = db.withSession(implicit session =>
-            ganadoresdb.filter(ganador => ganador.partido_id === resultado.partido_id).first()
+          val ganador_predicto: Option[GanadorPredicto] = db.withSession(implicit session =>
+            ganadoresPredictosdb.filter(gp => gp.partido_id === resultado.partido_id && gp.user_id === prediccion.user_id).firstOption())
+
+          val ganador: Option[Ganador]= db.withSession(implicit session =>
+            ganadoresdb.filter(ganador => ganador.partido_id === resultado.partido_id).firstOption()
           )
-          if (ganador_predicto.equipo == ganador.equipo)
-            pts += 1
+
+          if(ganador_predicto.isDefined && ganador.isDefined) {
+            if (ganador_predicto.get.equipo == ganador.get.equipo)
+              pts += 1
+          }
         }
 
         //acerto el marcador?
