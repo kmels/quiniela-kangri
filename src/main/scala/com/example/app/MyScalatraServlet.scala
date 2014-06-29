@@ -80,7 +80,7 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
       case Some(user) => {
         logger.info("Login exitoso")
         session.setAttribute("user", user)
-        redirect("/quiniela")
+        redirect("/puntuaciones")
       }
       case _ => {
         logger.info("Login fallo")
@@ -390,10 +390,19 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
         usuariosConPuntaje
       }}
 
-      val usuarios: List[((Usuario, Int), Int)] = puntosPorDiaPorUsuario.map{
+      val usuarios_hoy: List[((Usuario, Int), Int)] = puntosPorDiaPorUsuario.map{
         case (usuario, puntos_por_dia) => {
-          val puntuacion = puntos_por_dia.map(_._2).sum
-          (usuario, puntuacion)
+          val puntuacion_hoy = puntos_por_dia.map(_._2).sum
+          val diff = puntuacion_hoy
+          (usuario, puntuacion_hoy)
+        }
+      }.sortBy(_._2).reverse.zipWithIndex
+
+
+      val usuarios_ayer: List[((Usuario, Int), Int)] = puntosPorDiaPorUsuario.map{
+        case (usuario, puntos_por_dia) => {
+          val puntuacion_ayer = puntos_por_dia.toList.sortBy(_._1).reverse.drop(1).map(_._2).sum
+          (usuario, puntuacion_ayer)
         }
       }.sortBy(_._2).reverse.zipWithIndex
 
@@ -408,11 +417,15 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
             diaAnterior.add(Calendar.DAY_OF_MONTH, -1)
 
             if (!puntosAcumuladosPorUsuarioPorDia.contains(diaAnterior.getTime))
-              logger.debug ("El dia antes de "+dia + " es "+diaAnterior.getTime)
+              logger.info ("El dia antes de "+dia + " es "+diaAnterior.getTime)
 
             // al dia anterior, mapa de puntos acumulados
+
+            if (!puntosAcumuladosPorUsuarioPorDia.contains(diaAnterior.getTime))
+              diaAnterior.add(Calendar.DAY_OF_MONTH, -1)
+
             val puntosAcumuladosGente: HashMap[Usuario, Int] = puntosAcumuladosPorUsuarioPorDia
-              .getOrElseUpdate(diaAnterior.getTime,HashMap())
+              .getOrElseUpdate(diaAnterior.getTime, HashMap())
 
             val puntosAcumulados: Int = puntosAcumuladosGente.getOrElseUpdate(usr,0)
 
@@ -431,7 +444,14 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
 
       logger.debug("Acumulamos " +puntosAcumuladosPorUsuarioPorDia.size)
 
-      ssp("puntuaciones.ssp", "puntosAcumuladosPorUsuarioPorDia" -> puntosAcumuladosPorUsuarioPorDia.toList.sortBy(_._1), "usuarios" -> usuarios, "user" -> session.getAttribute("user"), "mensajes" -> getMensajes)
+      //HashMap[Date,HashMap[Usuario,Int]]
+      val historial = puntosAcumuladosPorUsuarioPorDia.toList.sortBy(_._1)
+      //historial.foreach(fecha => println(fecha._1 + "\n\t " + fecha._2.mkString("\n,") + "  \n\n") )
+
+
+      ssp("puntuaciones.ssp", "puntosAcumuladosPorUsuarioPorDia" -> historial ,
+        "usuarios_ayer" -> usuarios_ayer,
+        "usuarios_hoy" -> usuarios_hoy, "user" -> session.getAttribute("user"), "mensajes" -> getMensajes)
     } else
       ssp("login.ssp", "info" -> "Necesitás un login para accesar aquí")
   }

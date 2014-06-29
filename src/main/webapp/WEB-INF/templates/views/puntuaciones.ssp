@@ -2,7 +2,8 @@
 <% import scala.collection.mutable.HashMap %>
 <% import java.text.SimpleDateFormat %>
 <% import java.util.Date %>
-<%@ val usuarios: List[((Usuario, Int), Int)] = Nil %>
+<%@ val usuarios_hoy: List[((Usuario, Int), Int)] = Nil %>
+<%@ val usuarios_ayer: List[((Usuario, Int), Int)] = Nil %>
 <%@ val mensajes: List[((MensajeChat,Usuario), Int)] %>
 <%@ val df: SimpleDateFormat = new SimpleDateFormat("dd/MM/yyyy") %>
 <%@ val user: Usuario = null%>
@@ -21,13 +22,36 @@
       </tr>
      </thead>
      <tbody>
-      #for (((u,pts),pos) <- usuarios)
+      #for (((u,pts),pos) <- usuarios_hoy)
+        <% val pts_ayer: Int = usuarios_ayer.find(_._1._1 == u).get._1._2 %>
+        <% val pos_hoy = pos + 1 %>
+        <% val pos_ayer: Int = usuarios_ayer.find(_._1._1 == u).get._2 + 1%>
       <tr>
           <td>
             <img class="profile-img" src="/images/fotos/${u.ident}.jpg"/>
-            <a href="/predicciones/${u.ident}">${(pos + 1)}</a></td>
+            <a href="/predicciones/${u.ident}">${(pos + 1)}</a>
+
+                 <% val diff = pos_ayer - pos_hoy %>
+                            #if (diff > 0)
+                                #for (x <- 1 to diff)
+                                    <span style="color: green;" class="glyphicon glyphicon-arrow-up"></span>
+                                #end
+                            #else
+                                #for (x <- 1 to (diff*(-1)))
+                                    <span style="color:red;" class="glyphicon glyphicon-arrow-down"> </span>
+                                #end
+                            #end
+            </td>
           <td><a href="/predicciones/${u.ident}">${u.ident}</a></td>
-          <td><a href="/predicciones/${u.ident}">${pts}</a></td>
+
+          <td><a href="/predicciones/${u.ident}"><strong>${pts}</strong>
+
+
+
+
+            <span style="color: green;">(+${pts - pts_ayer})</span>
+          </a>
+          </td>
       </tr>
       #end
      </tbody>
@@ -112,7 +136,7 @@
 
 //       colors = ['#FF6600', '#FCD202', '#B0DE09', '#0D8ECF', '#2A0CD0', '#CD0D74', '#CC0000', '#00CC00', '#0000CC', '#DDDDDD', '#999999', '#333333', '#990000']
 
-       #for (((u,_),_) <- usuarios)
+       #for (((u,_),_) <- usuarios_hoy)
             // second graph
             var graph${u.id} = new AmCharts.AmGraph(AmCharts.themes.light);
             graph${u.id}.valueAxis = valueAxis2; // we have to indicate which value axis should be used
