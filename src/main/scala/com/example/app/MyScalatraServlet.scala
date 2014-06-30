@@ -417,7 +417,7 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
             diaAnterior.add(Calendar.DAY_OF_MONTH, -1)
 
             if (!puntosAcumuladosPorUsuarioPorDia.contains(diaAnterior.getTime))
-              logger.info ("El dia antes de "+dia + " es "+diaAnterior.getTime)
+              logger.debug ("El dia antes de "+dia + " es "+diaAnterior.getTime)
 
             // al dia anterior, mapa de puntos acumulados
 
