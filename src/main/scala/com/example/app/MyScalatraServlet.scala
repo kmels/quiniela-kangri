@@ -288,7 +288,7 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
       }
     } else {
       //octavos
-      if (resultado.partido_id <= 56) {
+      if (resultado.partido_id <= 60) {
         //gano el equipo 1 y acerto
         if ((resultado.goles_equipo1 > resultado.goles_equipo2) && (prediccion.goles_equipo1 > prediccion.goles_equipo2))
           pts += 4;
