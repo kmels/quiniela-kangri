@@ -421,8 +421,10 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
 
             // al dia anterior, mapa de puntos acumulados
 
-            if (!puntosAcumuladosPorUsuarioPorDia.contains(diaAnterior.getTime))
+            if (!puntosAcumuladosPorUsuarioPorDia.contains(diaAnterior.getTime)) //si ayer no hubo puntos, no hubo fecha, jalar de antiayer
               diaAnterior.add(Calendar.DAY_OF_MONTH, -1)
+              if (!puntosAcumuladosPorUsuarioPorDia.contains(diaAnterior.getTime)) //si antiayer no hubo fecha, jalar de el dia antes de antiayer
+                diaAnterior.add(Calendar.DAY_OF_MONTH, -1)
 
             val puntosAcumuladosGente: HashMap[Usuario, Int] = puntosAcumuladosPorUsuarioPorDia
               .getOrElseUpdate(diaAnterior.getTime, HashMap())
