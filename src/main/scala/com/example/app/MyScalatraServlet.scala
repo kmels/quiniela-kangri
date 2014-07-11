@@ -328,6 +328,8 @@ class MyScalatraServlet extends QuinielaStack with DatabaseSupport{
             pts += 1
         }
       } else{
+        logger.info("semis");
+
         //semis o finales
         //gano el equipo 1 y acerto
         if ((resultado.goles_equipo1 > resultado.goles_equipo2) && (prediccion.goles_equipo1 > prediccion.goles_equipo2))

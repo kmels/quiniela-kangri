@@ -124,6 +124,10 @@ class ScalatraBootstrap extends LifeCycle with DatabaseSupport{
     //semis
     insertarPartido("Brasil", "Alemania", at("08/07/2014 14:00"));
     insertarPartido("Holanda", "Argentina", at("09/07/2014 14:00"));    
+
+    //finales
+    insertarPartido("Brasil", "Holanda", at("12/07/2014 14:00"));    
+    insertarPartido("Alemania", "Argentina", at("12/07/2014 14:00"));    
   }
 
   def at(p: String) = dateFormat.parse(p)
