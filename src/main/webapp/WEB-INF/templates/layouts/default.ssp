@@ -1,6 +1,6 @@
 <% import com.example.app._ %>
 <%@ var body: String %>
-<%@ var pageTitle: String = "Quiniela Kangris" %>
+<%@ var pageTitle: String = "Eurocopa Kangris" %>
 <%@ val user: Usuario = null%>
 
 <!DOCTYPE html>
@@ -13,7 +13,7 @@
     <meta name="author" content="Carlos López-Camey">
     <link rel="shortcut icon" href="../../assets/ico/favicon.ico">
 
-    <title>Quiniela Kangris - ${pageTitle}</title>
+    <title>Quiniela - ${pageTitle}</title>
 
     <link href="/bootstrap-3.1.1-dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/main.css" rel="stylesheet"/>
@@ -40,7 +40,7 @@
           #end
         </ul>
 
-        <div><h2><a href="/">Quiniela Kangris</a></h2>
+        <div><h2><a href="/">Eurocopa Kangris</a></h2>
         </div>
       </div>
 
