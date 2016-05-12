@@ -21,7 +21,7 @@
             <div class="pull-left text-center country-container">
                 ${partido.equipo1}
                 <br>
-                <img src="/images/flags/${partido.equipo1}.png">
+                <img src="/images/flags/europe/${partido.equipo1}.png">
                 <input
                     #if (prediccion.goles_equipo1 >= 0)
                         value="${prediccion.goles_equipo1}"
@@ -44,7 +44,7 @@
             <div class="pull-left text-center country-container">
                 ${partido.equipo2}
                 <br>
-                <img src="/images/flags/${partido.equipo2}.png">
+                <img src="/images/flags/europe/${partido.equipo2}.png">
                 <br>
                 <input
                     #if (prediccion.goles_equipo2 >= 0)
