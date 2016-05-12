@@ -9,45 +9,42 @@
     <p>Bienvenidos! esta quiniela la hacemos los kangris. </p>
     </div>
 
-    <p>La entrada vale <strong>Q200</strong>.</p>
+    <p>La entrada vale <strong>Q150</strong>.</p>
     #if (nregistrados > 0)
-        <p>Van Q${200 * nregistrados} acumulados.</p>
+        <p>Q${150 * nregistrados} acumulados.</p>
     #end
 
-    <legend>Premios</legend>
+    <legend><h1>Premios</h1></legend>
     <ul>
-      <li>50% para el primer lugar
-      #if (nregistrados > 0)
-        (Q${100 * nregistrados})
-      #end</li>
-      <li>35% para el segundo lugar
-      #if (nregistrados > 0)
-        (Q${70 * nregistrados})
-      #end</li>
-      <li>10% para el tercer lugar (Q${20 * nregistrados})</li>
-      <li>4% para el que acierte m&aacute;s resultados (Q${8 * nregistrados})</li>
-      <li>1% para costos de la p&aacute;gina (Q${2 * nregistrados})</li>
+      <li>30% - mayor cantidad de aciertos exactos.
+      <li>20% - mayor cantidad de puntos.
+      <li>15% - segunda cantidad mayor de puntos.
+      <li>10% - tercera cantidad mayor de puntos. 
+      <li>10% - los que acierten al campeon (si nadie acierta campeon, este 10% es para la mayor cantidad de puntos)
+      <li>10% - los que acierten a los finalistas (si nadie acierta, este 10% es para la cuarta cantidad mayor de puntos)
+      <li>5%  - gastos de administraci&oacute;n
+
     </ul>
 
     <p>Fase de grupos</p>
     <ul>
-      <li>3 puntos por predecir el ganador de un partido (o el empate)</li>
-      <li>2 puntos extras por acertar el marcador</li>
+      <li>1 punto al predecir el ganador (o empate) de un partido</li>
+      <li>2 puntos extras al acertar el marcador</li>
       <li>1 punto extra por haber sido el &uacute;nico que acertad&oacute; el marcador</li>
     </ul>
 
     <p>Octavos, cuartos de final y semifinales</p>
     <ul>
-      <li>4 puntos por predecir el ganador de un partido (o el empate)</li>
-      <li>2 puntos extras por acertar el marcador</li>
-      <li>1 punto extra por haber sido el &uacute;nico que acertad&oacute; el marcador</li>
+      <li>2 puntos por predecir el ganador de un partido (o el empate)</li>
+      <li>3 puntos extras por acertar el marcador</li>
+      <li>2 puntos extra por haber sido el &uacute;nico que acertad&oacute; el marcador</li>
     </ul>
 
     <p>Final</p>
     <ul>
-      <li>7 puntos por predecir el ganador del partido</li>
-      <li>3 puntos extras por acertar el marcador</li>
-      <li>2 punto extra por haber sido el &uacute;nico que acertad&oacute; el marcador</li>
+      <li>3 puntos por predecir el ganador del partido</li>
+      <li>4 puntos extras por acertar el marcador</li>
+      <li>3 puntos extra por haber sido el &uacute;nico que acertad&oacute; el marcador</li>
     </ul>
 </div>
 
